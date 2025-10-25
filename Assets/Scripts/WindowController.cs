@@ -9,7 +9,7 @@ public class WindowController : MonoBehaviour
     public GameObject streamWindow;
 
     // Default positions
-    public Vector2 avatarDefaultPos = new Vector2(976, -552);
+    public Vector2 avatarDefaultPos = new Vector2(0, 0);
     public Vector2 shopDefaultPos = new Vector2(0,0);
     public Vector2 streamDefaultPos = new Vector2(0,0);
     
