@@ -7,14 +7,33 @@ public class WindowController : MonoBehaviour
     public GameObject avatarWindow;
     public GameObject shopWindow;
     public GameObject streamWindow;
+    public GameObject hisscordWindow;
+    public GameObject readmeWindow;
+
+    public CharacterCustomization customization;
 
     // Default positions
     public Vector2 avatarDefaultPos = new Vector2(0, 0);
     public Vector2 shopDefaultPos = new Vector2(0,0);
     public Vector2 streamDefaultPos = new Vector2(0,0);
+    public Vector2 hisscordDefaultPos = new Vector2(0,0);
+    public Vector2 readmeDefaultPos = new Vector2(0,0);
     
     // Open a window
     public void OpenWindow(GameObject window) {
+        if (customization != null && !customization.IsInitialized) {
+            customization.Initialize();
+        }
+
+        // If opening avatar or shop, close the other (both cannot be open at the same time)
+        if (window == avatarWindow && shopWindow.activeSelf) {
+            shopWindow.SetActive(false);
+        }
+        else if (window == shopWindow && avatarWindow.activeSelf) {
+            avatarWindow.SetActive(false);
+        }
+
+        // Open requested window
         if (window != null) {
             window.SetActive(true);
             ResetWindowPosition(window);
@@ -41,6 +60,12 @@ public class WindowController : MonoBehaviour
         }
         else if (window = streamWindow) {
             rect.anchoredPosition = streamDefaultPos;
+        }
+        else if (window = hisscordWindow) {
+            rect.anchoredPosition = hisscordDefaultPos;
+        }
+        else if (window = readmeWindow) {
+            rect.anchoredPosition = readmeDefaultPos;
         }
     }
 }

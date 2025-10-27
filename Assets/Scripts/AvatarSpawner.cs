@@ -8,6 +8,8 @@ public class AvatarSpawner : MonoBehaviour
     public GameObject avatarPrefab;
     [HideInInspector] public GameObject avatarInstance;
 
+    // Allow avatar to be updated in shop mode
+    public bool allowShopPreview = false;
 
     void Start()
     {
@@ -24,7 +26,7 @@ public class AvatarSpawner : MonoBehaviour
 
         CharacterCustomization customization = avatarInstance.GetComponent<CharacterCustomization>();
         if (customization != null) {
-            customization.ApplyCustomizationFromSpawner(hairIndex, outfitIndex);
+            customization.ApplyCustomizationFromSpawner(hairIndex, outfitIndex, allowShopPreview);
         }
     }
 }
