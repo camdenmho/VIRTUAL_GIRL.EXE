@@ -51,28 +51,30 @@ public class CharacterCustomization : MonoBehaviour
 
     public bool IsInitialized => isInitialized;
 
-    // PLAYERPREFS
-    // private void Start() {
-    //     LoadUnlocks();
 
-    //     hairIndex = PlayerPrefs.GetInt("HairIndex", 0);
-    //     outfitIndex = PlayerPrefs.GetInt("OutfitIndex", 0);
-
-    //     ApplyCustomization();
-    // }
+    // When a window becomes active, reload the latest saved customizations from PlayerPrefs
+    private void OnEnable() {
+        int savedHair = PlayerPrefs.GetInt("HairIndex", 0);
+        int savedOutfit = PlayerPrefs.GetInt("OutfitIndex", 0);
+        ApplyCustomizationFromSpawner(savedHair, savedOutfit, false);
+    }
 
     // LOAD UNLOCKS
     private void LoadUnlocks() {
         unlockedOutfits = new bool[outfitOptions.Length];
         unlockedHairs = new bool[hairOptions.Length];
 
+        // Load outfit unlock states from PlayerPrefs
         for (int i = 0; i < unlockedOutfits.Length; i++) {
+            // Check if outfit at index is default unlocked
             bool isDefault = System.Array.IndexOf(defaultUnlockedOutfits, i) >= 0;
-            unlockedOutfits[i] = PlayerPrefs.GetInt("OutfitUnlocked_" + i, isDefault ? 1: 0) == 1;
+            unlockedOutfits[i] = PlayerPrefs.GetInt("OutfitUnlocked_" + i, isDefault ? 1 : 0) == 1;
         }
+        // Load hair unlock states from PlayerPrefs
         for (int i = 0; i < unlockedHairs.Length; i++) {
+            // Check if hair at index is default unlocked
             bool isDefault = System.Array.IndexOf(defaultUnlockedHairs, i) >= 0;
-            unlockedHairs[i] = PlayerPrefs.GetInt("HairUnlocked_" + i, isDefault ? 1: 0) == 1;
+            unlockedHairs[i] = PlayerPrefs.GetInt("HairUnlocked_" + i, isDefault ? 1 : 0) == 1;
         }
     }
 
@@ -80,16 +82,16 @@ public class CharacterCustomization : MonoBehaviour
     public void NextOutfit() {
         int startIndex = outfitIndex;
         do {
-            outfitIndex = (outfitIndex + 1) % outfitOptions.Length;
-        } while (!isShopMode && !unlockedOutfits[outfitIndex] && outfitIndex != startIndex);
+            outfitIndex = (outfitIndex + 1) % outfitOptions.Length; // loop outfits
+        } while (!isShopMode && !unlockedOutfits[outfitIndex] && outfitIndex != startIndex); // skip locked outfits unless in shop mode
         ApplyCustomization();
     }
 
     public void PrevOutfit() {
         int startIndex = outfitIndex;
         do {
-            outfitIndex = (outfitIndex - 1 + outfitOptions.Length) % outfitOptions.Length;
-        } while (!isShopMode && !unlockedOutfits[outfitIndex] && outfitIndex != startIndex);
+            outfitIndex = (outfitIndex - 1 + outfitOptions.Length) % outfitOptions.Length; // loop outfits
+        } while (!isShopMode && !unlockedOutfits[outfitIndex] && outfitIndex != startIndex); // skip locked outfits unless in shop mode
         ApplyCustomization();
     }
 
@@ -97,20 +99,21 @@ public class CharacterCustomization : MonoBehaviour
     public void NextHair() {
         int startIndex = hairIndex;
         do {
-            hairIndex = (hairIndex + 1) % hairOptions.Length;
-        } while (!isShopMode && !unlockedHairs[hairIndex] && hairIndex != startIndex);
+            hairIndex = (hairIndex + 1) % hairOptions.Length; // loop hairs
+        } while (!isShopMode && !unlockedHairs[hairIndex] && hairIndex != startIndex); // skip locked hairs unless in shop mode
         ApplyCustomization();
     }
 
     public void PrevHair() {
         int startIndex = hairIndex;
         do {
-            hairIndex = (hairIndex - 1 + hairOptions.Length) % hairOptions.Length;
-        } while (!isShopMode && !unlockedHairs[hairIndex] && hairIndex != startIndex);
+            hairIndex = (hairIndex - 1 + hairOptions.Length) % hairOptions.Length; // loop hairs
+        } while (!isShopMode && !unlockedHairs[hairIndex] && hairIndex != startIndex); // skip locked hairs unless in shop mode
         ApplyCustomization();
     }
 
     // UPDATE TITLES
+    // Outfit title
     private void UpdateOutfitTitle() {
         if (outfitTitleText != null) {
             outfitTitleText.text = "outfit " + (outfitIndex + 1);
@@ -120,6 +123,7 @@ public class CharacterCustomization : MonoBehaviour
         }
     }
 
+    // Hair title
     private void UpdateHairTitle() {
         if (hairTitleText != null) {
             hairTitleText.text = "hair " + (hairIndex + 1);
@@ -129,6 +133,7 @@ public class CharacterCustomization : MonoBehaviour
         }
     }
 
+    // Donation display
     public void UpdateDonationDisplay() {
         if (donationTotalText != null && isShopMode) {
             int currentDonations = PlayerPrefs.GetInt("Donations", 0);
@@ -148,13 +153,15 @@ public class CharacterCustomization : MonoBehaviour
         UpdateOutfitTitle();
         UpdateHairTitle();
 
-        // Shop window
+        // For shop window preview
+        // Determine whether hair or outfit is unlocked/locked
         if (isShopMode && purchaseButton != null) {
             bool outfitLocked = !unlockedOutfits[outfitIndex];
             bool hairLocked = !unlockedHairs[hairIndex];
             purchaseButton.gameObject.SetActive(outfitLocked || hairLocked);
 
             // Update prices
+            // Show price if locked, show "Unlocked" if unlocked
             if (outfitPriceText != null) {
                 outfitPriceText.text = outfitLocked ? "$" + outfitPrices[outfitIndex].ToString() : "Unlocked";
             }
@@ -188,11 +195,12 @@ public class CharacterCustomization : MonoBehaviour
         }
     }
 
+    // APPLY CUSTOMIZATION FROM SPAWNER
     public void ApplyCustomizationFromSpawner(int hair, int outfit, bool isPreview = false) {
         updatingFromSpawner = true;
         hairIndex = hair;
         outfitIndex = outfit;
-        isShopMode = isPreview;
+        isShopMode = isPreview; // toggle shop mode
         ApplyCustomization();
         updatingFromSpawner = false;
     }
@@ -210,7 +218,7 @@ public class CharacterCustomization : MonoBehaviour
             totalCost += hairPrices[hairIndex];
         }
         
-        // Unlock
+        // Unlock only if player has enough donations
         if (currentDonations >= totalCost) {
             if (!unlockedOutfits[outfitIndex]) {
                 unlockedOutfits[outfitIndex] = true;
@@ -220,6 +228,8 @@ public class CharacterCustomization : MonoBehaviour
                 unlockedHairs[hairIndex] = true;
                 PlayerPrefs.SetInt("HairUnlocked_" + hairIndex, 1);
             }
+
+            // Update player's total donations
             PlayerPrefs.SetInt("Donations", currentDonations - totalCost);
             PlayerPrefs.Save();
             ApplyCustomization();
@@ -231,7 +241,7 @@ public class CharacterCustomization : MonoBehaviour
         UpdateDonationDisplay();
     }
 
-    // SAVE PREFERENCES
+    // SAVE PLAYER PREFERENCES
     private void SavePreferences() {
         PlayerPrefs.SetInt("HairIndex", hairIndex);
         PlayerPrefs.SetInt("OutfitIndex", outfitIndex);
@@ -253,10 +263,10 @@ public class CharacterCustomization : MonoBehaviour
         isInitialized = true;
     }
 
-    // RESET
+    // RESETS
     [ContextMenu("Reset PlayerPrefs Non-Default Unlocks and Avatar")]
     public void ResetAllUnlocksAndAvatar() {
-        // Reset unlocks
+        // Reset all non-default unlocks
         for (int i = 0; i < outfitOptions.Length; i++) {
             bool isDefault = System.Array.IndexOf(defaultUnlockedOutfits, i) >= 0;
             PlayerPrefs.SetInt("OutfitUnlocked_" + i, isDefault ? 1 : 0);

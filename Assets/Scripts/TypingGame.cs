@@ -16,7 +16,7 @@ public class TypingGame : MonoBehaviour
 
     [Header("Round Info")]
     public TMP_Text roundInfoText;
-    private int currentRound = 1;
+    private int currentRound = 1; 
 
     [Header("Results Window")]
     public GameObject resultsWindow;
@@ -26,6 +26,9 @@ public class TypingGame : MonoBehaviour
     [Header("Typing Highlight Colors")]
     public string typedColorHex = "#f181d9"; // color for correctly typed characters
     public string wrongColorHex = "#cd3066"; // color for incorrectly typed characters
+
+    [Header("Audio")]
+    public AudioController audioController;
 
     [System.Serializable]
     public class Difficulty {
@@ -57,6 +60,8 @@ public class TypingGame : MonoBehaviour
     private int totalDonations;
     private int roundFollowers; // followers gained in one round
     private int roundDonations; // donations gained in one round
+
+    private int previousLength = 0;
 
     public static System.Action OnStatsUpdated;
     
@@ -107,7 +112,7 @@ public class TypingGame : MonoBehaviour
     void LoadPhrases() {
         allPhrases.Clear();
         if (currentDifficulty.phraseFile != null) {
-            // Split file per line
+            // Split file by newline
             string[] lines = currentDifficulty.phraseFile.text.Split('\n');
             foreach (string line in lines) {
                 string trimmed = line.Trim();
@@ -138,14 +143,14 @@ public class TypingGame : MonoBehaviour
 
     // Starts a new round
     public void StartGame() {
-        SetDifficulty(currentRound); // set difficulted based on round
+        SetDifficulty(currentRound); // set difficulty based on round
 
         phrasesTyped = 0; // reset counter
         timer = currentDifficulty.timeLimit;
         isPlaying = true;
 
-        roundFollowers = 0;
-        roundDonations = 0;
+        roundFollowers = 0; // followers gained in a single round
+        roundDonations = 0; // donations gained in a single round
 
         // Clear chat at round start
         if (chatSimulator != null) {
@@ -184,6 +189,7 @@ public class TypingGame : MonoBehaviour
 
         // Checks if input matches the target phrase
         if (inputField.text == currentPhrase) {
+            audioController?.PlayCorrect(); // correct
             RewardPlayer();  
             phrasesTyped++;
 
@@ -196,6 +202,7 @@ public class TypingGame : MonoBehaviour
             }
         }
         else {
+            audioController?.PlayIncorrect(); // incorrect
             LoseFollowers();
         }
     }
@@ -207,6 +214,13 @@ public class TypingGame : MonoBehaviour
         string typed = inputField.text;
         string displayText = "";
 
+        // Typing sound only when a new character is added
+        if (typed.Length > previousLength) {
+            audioController?.PlayTyping();
+        }
+        previousLength = typed.Length;
+
+        // Check phrase accuracy per character and highlight accordingly
         for (int i = 0; i < currentPhrase.Length; i++) {
             if (i < typed.Length) {
                 if (typed[i] == currentPhrase[i]) {
@@ -230,6 +244,7 @@ public class TypingGame : MonoBehaviour
         int followerGain = Mathf.RoundToInt(followersPerPhrase * currentDifficulty.rewardMultiplier);
         int donationGain = Mathf.RoundToInt(donationsPerPhrase * currentDifficulty.rewardMultiplier);
 
+        // Update totals
         totalFollowers += followerGain;
         totalDonations += donationGain;
 
@@ -239,7 +254,7 @@ public class TypingGame : MonoBehaviour
         SaveStats();
     }
 
-    // When player types phrase incorrectly
+    // When player types phrase incorrectly, they lose followers
     void LoseFollowers() {
         totalFollowers = Mathf.Max(totalFollowers - followerPenaltyPerFail, 0);
         SaveStats();
@@ -281,6 +296,7 @@ public class TypingGame : MonoBehaviour
         // Display results window
         if (resultsWindow != null) {
             resultsWindow.SetActive(true);
+            audioController?.PlayResultsClip();
             if (resultsFollowersText != null) {
                 // + or - based on followers gained or lost
                 string prefix = roundFollowers >= 0 ? "+" : "-";
@@ -298,6 +314,7 @@ public class TypingGame : MonoBehaviour
         SaveStats();
     }
 
+    // Resets
     [ContextMenu("Reset PlayerPrefs Followers and Donations")]
     public void ResetFollowersAndDonations() {
         PlayerPrefs.SetInt("Followers", 0);

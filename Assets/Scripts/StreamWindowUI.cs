@@ -28,6 +28,7 @@ public class StreamWindowUI : MonoBehaviour
         TypingGame.OnStatsUpdated -= AnimateStatusUpdate;
     }
 
+    // Animate follower and donation numbers
     private void AnimateStatusUpdate() {
         int targetFollowers = PlayerPrefs.GetInt("Followers", 0);
         int targetDonations = PlayerPrefs.GetInt("Donations", 0);
@@ -71,6 +72,7 @@ public class StreamWindowUI : MonoBehaviour
         }
     }
 
+    // Update all donations displays 
     private void UpdateDonationsTexts(int value) {
         foreach (var text in donationsTexts) {
             if (text != null) {

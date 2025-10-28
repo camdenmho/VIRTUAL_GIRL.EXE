@@ -21,6 +21,7 @@ public class AvatarSpawner : MonoBehaviour
         }
     }
 
+    // Update avatar
     public void UpdateAvatarFromSpawner(int hairIndex, int outfitIndex) {
         if (avatarInstance == null) return;
 

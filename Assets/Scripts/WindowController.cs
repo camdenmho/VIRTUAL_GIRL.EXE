@@ -4,6 +4,7 @@ using UnityEngine;
 
 public class WindowController : MonoBehaviour
 {
+    [Header("Windows")]
     public GameObject avatarWindow;
     public GameObject shopWindow;
     public GameObject streamWindow;

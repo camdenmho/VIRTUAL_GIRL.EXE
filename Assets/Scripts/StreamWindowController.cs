@@ -15,6 +15,9 @@ public class StreamWindowController : MonoBehaviour
     public float countdownSeconds = 3f; // seconds
     public TypingGame typingGame;
 
+    [Header("Audio")]
+    public AudioController audioController;
+
 
     void Start()
     {
@@ -40,6 +43,7 @@ public class StreamWindowController : MonoBehaviour
             typingGame.resultsWindow.SetActive(false);
         }
 
+        // Start countdown
         if (countdownPanel != null && countdownText != null) {
             StartCoroutine(CountdownCoroutine());
         }
@@ -54,6 +58,7 @@ public class StreamWindowController : MonoBehaviour
             gameplayWindow.SetActive(false);
         }
 
+        // Stop and clear chat at the end of each stream
         if (chatSimulator != null) {
             chatSimulator.StopChat();
             chatSimulator.ClearChat();
@@ -67,19 +72,25 @@ public class StreamWindowController : MonoBehaviour
 
         while (timer > 0) {
             countdownText.text = Mathf.Ceil(timer).ToString();
+
+            // Play countdown tick sound
+            audioController?.PlayCountdownTick();
+
             yield return new WaitForSeconds(1f);
             timer -= 1f;
         }
 
+        audioController?.PlayCountdownTick();
         countdownText.text = "stream start!";
         yield return new WaitForSeconds(1f);
 
         countdownPanel.SetActive(false);
 
+        // Start stream after countdown ends
         if (typingGame != null) {
             typingGame.StartGame();
         }
-
+        // Start chat after countdown ends
         if (chatSimulator != null) {
             chatSimulator.StartChat();
         }

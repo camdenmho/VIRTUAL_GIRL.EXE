@@ -14,8 +14,8 @@ public class ChatSimulator : MonoBehaviour
     public float maxMessageInterval = 2f; // maximum delay between messages
     public int maxMessagesOnScreen = 20; // limit visible lines
 
-    private List<string> allMessages = new List<string>();
-    private Queue<TMP_Text> activeMessages = new Queue<TMP_Text>();
+    private List<string> allMessages = new List<string>(); // all messages from text file
+    private Queue<TMP_Text> activeMessages = new Queue<TMP_Text>(); // messages currently spawned in the hierarchy
     private Coroutine chatRoutine;
 
     void Start()
@@ -27,6 +27,7 @@ public class ChatSimulator : MonoBehaviour
     void LoadChatMessages() {
         allMessages.Clear();
 
+        // Delimit by newline, add trimmed lines to allMessages
         if (chatMessagesFile != null) {
             string[] lines = chatMessagesFile.text.Split("\n");
             foreach (string line in lines) {
@@ -65,6 +66,7 @@ public class ChatSimulator : MonoBehaviour
         activeMessages.Clear();
     }
 
+    // Spawn a limited number of messages at random intervals
     private IEnumerator ChatRoutine() {
         while (true) {
             yield return new WaitForSeconds(Random.Range(minMessageInterval, maxMessageInterval));
