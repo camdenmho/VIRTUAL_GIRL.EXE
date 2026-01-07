@@ -15,3 +15,6 @@
 - **Nostalgic UI:** Play through playful windows that you can drag and overlap, giving the interface a fun, nostalgic feel.
 - **Custom Art Assets:** Every character, interface element, and animation was carefully crafted from scratch.
 - **Persistent Progress:** Keep your VTuber’s stats across sessions, so your fame always grows.
+<br>
+
+![VIRTUAL_GIRL.EXE](StreamWindow.png)
